@@ -71,7 +71,7 @@
               // localStorage.setItem("키","값") - 웹 로컬저장소 사용;
               let writtenOutput = "";
               writtenWordArray.forEach(function (item, index) {
-                writtenOutput += `<li>${item}</li>`;
+                writtenOutput += `<li>#${item}</li>`;
               });
               writtenWord.innerHTML = writtenOutput;
               word.value = "";
@@ -81,6 +81,40 @@
             Fancybox.bind("[data-fancybox]", {});
           });
       }
+    });
+    /*
+    const writtenWordItems = document.querySelectorAll("#writtenWord ul li");
+    console.log(writtenWordItems);
+    // writtenWordItems.addEventListener()
+    writtenWordItems.forEach(function (item, index) {
+      item.addEventListener("click", () => {
+        console.log(item.textContent);
+      });
+    });
+    기존에 있던 것들을 볼 때..*/
+    writtenWord.addEventListener("click", (e) => {
+      // console.log(writtenWord.innerHTML);
+      // console.log(e.target.textContent);
+      // target : 이벤트가 적용되는 최종지점
+      axios
+        .get(`https://dapi.kakao.com/v2/search/vclip?query=${e.target.textContent.substr(1)}&size=24`, {
+          headers: {
+            Authorization: "KakaoAK 071de0321e15d8e6b7bee0340a39ac0e",
+          },
+        })
+        .then(function (res) {
+          console.log(res);
+          const documents = res.data.documents;
+          let output = "";
+          thumbnailList.innerHTML = "";
+          documents.forEach(function (item, index) {
+            // thumbnailList.innerHTML += `<li><img src="${item.thumbnail_url}"></li>`;  // 한번에 출력
+            output += `<li><a href="${item.url}" data-fancybox="gallery" data-caption="${item.doc_url}"><img src="${item.thumbnail}"></a></li>`; // 뭉쳐놓고
+          });
+          thumbnailList.innerHTML = output; // 출력
+          gsap.from("#thumbnails li", { scale: 0, duration: 0.5, stagger: 0.02 });
+          Fancybox.bind("[data-fancybox]", {});
+        });
     });
   </script>
 </html>
