@@ -53,40 +53,28 @@
     // suggestWord.textContent = firstWordArray[Math.floor(Math.random() * firstWordArray.length)];
     word.addEventListener("keyup", (e) => {
       if (e.keyCode === "13" || e.key === "Enter") {
+        if (word.value.length !== 3) {
+          alert("3글자만 입력해야합니다.");
+          word.value = "";
+          word.focus();
+          return;
+        }
         const lastWord = writtenWordArray[writtenWordArray.length - 1];
         const lastChar = lastWord.charAt(lastWord.length - 1);
         const firstChar = word.value.charAt(0);
         const url = `https://opendict.korean.go.kr/api/search?key=C2389D670F763A998AA6E0F9FA6813FC&q=${word.value}&req_type=json&advanced=y&method=exact`;
         axios.get(url).then(function (res) {
-          if (word.value.length !== 3) {
-            alert("3글자만 입력해야합니다.");
+          if (firstChar === lastChar && !writtenWordArray.includes(word.value) && res.data.channel.total > 0) {
+            // suggestWord.textContent = word.value;
+            // writtenWord.textContent += " " + word.value;
+            writtenWordArray.push(word.value);
+            writtenWord.innerHTML = "";
+            writtenWordArray.forEach(function (item, index) {
+              writtenWord.innerHTML += `<li>${item}</li>`;
+            });
             word.value = "";
             word.focus();
-            return;
-          }
-          if (res.data.channel.total > 0) {
-            if (firstChar === lastChar) {
-              if (!writtenWordArray.includes(word.value)) {
-                // suggestWord.textContent = word.value;
-                // writtenWord.textContent += " " + word.value;
-                writtenWordArray.push(word.value);
-                writtenWord.innerHTML = "";
-                writtenWordArray.forEach(function (item, index) {
-                  writtenWord.innerHTML += `<li>${item}</li>`;
-                });
-                word.value = "";
-                word.focus();
-                console.log(writtenWordArray);
-              } else {
-                word.value = "";
-                word.focus();
-                gsap.fromTo(word, { x: 100 }, { x: 0, ease: "elastic", duration: 0.5 });
-              }
-            } else {
-              word.value = "";
-              word.focus();
-              gsap.fromTo(word, { x: 100 }, { x: 0, ease: "elastic", duration: 0.5 });
-            }
+            console.log(writtenWordArray);
           } else {
             word.value = "";
             word.focus();
