@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="../css/reset.css" />
     <link rel="stylesheet" href="../css/layout.css" />
     <script src="../js/gsap/gsap.min.js"></script>
+    <script src="../js/axios.min.js"></script>
   </head>
   <body>
     <div class="wrap">
@@ -55,34 +56,43 @@
         const lastWord = writtenWordArray[writtenWordArray.length - 1];
         const lastChar = lastWord.charAt(lastWord.length - 1);
         const firstChar = word.value.charAt(0);
-        if (word.value.length !== 3) {
-          alert("3글자만 입력해야합니다.");
-          word.value = "";
-          word.focus();
-          return;
-        }
-        if (firstChar === lastChar) {
-          if (!writtenWordArray.includes(word.value)) {
-            // suggestWord.textContent = word.value;
-            // writtenWord.textContent += " " + word.value;
-            writtenWordArray.push(word.value);
-            writtenWord.innerHTML = "";
-            writtenWordArray.forEach(function (item, index) {
-              writtenWord.innerHTML += `<li>${item}</li>`;
-            });
+        const url = `https://opendict.korean.go.kr/api/search?key=C2389D670F763A998AA6E0F9FA6813FC&q=${word.value}&req_type=json&advanced=y&method=exact`;
+        axios.get(url).then(function (res) {
+          if (word.value.length !== 3) {
+            alert("3글자만 입력해야합니다.");
             word.value = "";
             word.focus();
-            console.log(writtenWordArray);
+            return;
+          }
+          if (res.data.channel.total > 0) {
+            if (firstChar === lastChar) {
+              if (!writtenWordArray.includes(word.value)) {
+                // suggestWord.textContent = word.value;
+                // writtenWord.textContent += " " + word.value;
+                writtenWordArray.push(word.value);
+                writtenWord.innerHTML = "";
+                writtenWordArray.forEach(function (item, index) {
+                  writtenWord.innerHTML += `<li>${item}</li>`;
+                });
+                word.value = "";
+                word.focus();
+                console.log(writtenWordArray);
+              } else {
+                word.value = "";
+                word.focus();
+                gsap.fromTo(word, { x: 100 }, { x: 0, ease: "elastic", duration: 0.5 });
+              }
+            } else {
+              word.value = "";
+              word.focus();
+              gsap.fromTo(word, { x: 100 }, { x: 0, ease: "elastic", duration: 0.5 });
+            }
           } else {
             word.value = "";
             word.focus();
             gsap.fromTo(word, { x: 100 }, { x: 0, ease: "elastic", duration: 0.5 });
           }
-        } else {
-          word.value = "";
-          word.focus();
-          gsap.fromTo(word, { x: 100 }, { x: 0, ease: "elastic", duration: 0.5 });
-        }
+        });
       }
     });
     // 1. 주어진 단어의 마지막 글자와 입력하는 글자의 첫 글자가 같으면
@@ -95,4 +105,17 @@
     console.log(fruits.includes("jamong"));
     // true,false 로 출력됨
   </script>
+  <script>
+    axios.get("https://opendict.korean.go.kr/api/search?key=C2389D670F763A998AA6E0F9FA6813FC&q=호랑이&req_type=json").then(function (data) {
+      console.log(data);
+    });
+    // cors : cross origin ress - 같은 도메인에서만 가능
+  </script>
 </html>
+
+<!-- ajax(asynchronous javascript and xml) -->
+<!-- axios 라이브러리 -->
+<!-- jQuery : 1. Dom찾는데 선수다 -->
+<!--          2. ajax 메소드를 갖고 있다 -->
+<!--          3. 간단한 애니메이션 만들기 좋음  -->
+<!-- postman : 미리 서버 전송을 해서 데이터가 잘 넘어오는지 확인 -->
