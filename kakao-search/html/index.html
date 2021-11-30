@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kakao Search</title>
+    <link rel="stylesheet" href="../css/reset.css" />
+    <link rel="stylesheet" href="../css/fancybox.css" />
+    <link rel="stylesheet" href="../css/layout.css" />
+    <script src="../js/gsap/gsap.min.js"></script>
+    <script src="../js/axios.min.js"></script>
+    <script src="../js/fancybox.umd.js"></script>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1 id="main">
+        <span class="main">KAKAO <strong>IMAGE SEARCH</strong></span>
+      </h1>
+      <div id="writtenWord">
+        <ul>
+          <!-- <li>#김태희</li> -->
+        </ul>
+      </div>
+      <div id="thumbnails">
+        <ul></ul>
+      </div>
+      <div class="inputBox"><input type="text" id="word" /></div>
+    </div>
+  </body>
+  <script>
+    const thumbnailList = document.querySelector("#thumbnails ul");
+    const writtenWord = document.querySelector("#writtenWord ul");
+    const word = document.querySelector("#word");
+    let writtenWordArray = [];
+    let writtenOutput = "";
+    if (JSON.parse(localStorage.getItem("recentSearchWord")) !== null) {
+      writtenWordArray = JSON.parse(localStorage.getItem("recentSearchWord"));
+      // console.log(typeof localStorage.getItem("recentEarchWord"));
+      writtenWordArray.forEach(function (item, index) {
+        writtenOutput += `<li>${item}</li>`;
+      });
+    }
+    writtenWord.innerHTML = writtenOutput;
+    word.addEventListener("keyup", (e) => {
+      if (e.key === "Enter" || e.keyCode === 13) {
+        axios
+          .get(`https://dapi.kakao.com/v2/search/vclip?query=${word.value}&size=24`, {
+            headers: {
+              Authorization: "KakaoAK 071de0321e15d8e6b7bee0340a39ac0e",
+            },
+          })
+          .then(function (res) {
+            console.log(res);
+            const documents = res.data.documents;
+            let output = "";
+            thumbnailList.innerHTML = "";
+            documents.forEach(function (item, index) {
+              // thumbnailList.innerHTML += `<li><img src="${item.thumbnail_url}"></li>`;  // 한번에 출력
+              output += `<li><a href="${item.url}" data-fancybox="gallery" data-caption="${item.doc_url}"><img src="${item.thumbnail}"></a></li>`; // 뭉쳐놓고
+            });
+            thumbnailList.innerHTML = output; // 출력
+            gsap.from("#thumbnails li", { scale: 0, duration: 0.5, stagger: 0.02 });
+
+            if (!writtenWordArray.includes(word.value)) {
+              writtenWordArray.push(word.value);
+              console.log(writtenWordArray);
+              localStorage.setItem("recentSearchWord", JSON.stringify(writtenWordArray));
+              // 배열로 들어감
+              // localStorage.setItem("recentSearchWord", writtenWordArray);
+              // localStorage.setItem("키","값") - 웹 로컬저장소 사용;
+              let writtenOutput = "";
+              writtenWordArray.forEach(function (item, index) {
+                writtenOutput += `<li>${item}</li>`;
+              });
+              writtenWord.innerHTML = writtenOutput;
+              word.value = "";
+              word.focus();
+            }
+
+            Fancybox.bind("[data-fancybox]", {});
+          });
+      }
+    });
+  </script>
+</html>
