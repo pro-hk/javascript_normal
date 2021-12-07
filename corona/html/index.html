@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CORONA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link rel="stylesheet" href="../css/reset.css" />
+    <link rel="stylesheet" href="../css/layout.css" />
+    <script src="../js/gsap/gsap.min.js"></script>
+    <script src="../js/axios.min.js"></script>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1 id="main">
+        <span class="main"><strong>CORONA</strong></span>
+      </h1>
+      <div class="calendar">
+        <div class="header">
+          <button class="prev"><span class="material-icons"> arrow_back </span></button>
+          <div class="monthBox">
+            <span class="year">2021</span>
+            <span class="month">12</span>
+          </div>
+          <button class="next"><span class="material-icons"> arrow_forward </span></button>
+        </div>
+        <!-- header -->
+        <div class="days">
+          <ul>
+            <li class="sun"><span>SUN</span></li>
+            <li><span>MON</span></li>
+            <li><span>TUE</span></li>
+            <li><span>WED</span></li>
+            <li><span>THU</span></li>
+            <li><span>FRI</span></li>
+            <li class="sat"><span>SAT</span></li>
+          </ul>
+        </div>
+        <!-- days -->
+        <div class="dates">
+          <ul>
+            <!-- <li><span>01</span></li>
+            <li><span>02</span></li>
+            <li><span>03</span></li>
+            <li><span>04</span></li>
+            <li><span>05</span></li>
+            <li><span>06</span></li>
+            <li><span>07</span></li>
+            <li><span>08</span></li>
+            <li><span>09</span></li>
+            <li><span>10</span></li>
+            <li><span>11</span></li>
+            <li><span>12</span></li>
+            <li><span>13</span></li>
+            <li><span>14</span></li>
+            <li><span>15</span></li>
+            <li><span>16</span></li>
+            <li><span>17</span></li>
+            <li><span>18</span></li>
+            <li><span>19</span></li>
+            <li><span>20</span></li>
+            <li><span>21</span></li>
+            <li><span>22</span></li>
+            <li><span>23</span></li>
+            <li><span>24</span></li>
+            <li><span>25</span></li>
+            <li><span>26</span></li>
+            <li><span>27</span></li>
+            <li><span>28</span></li>
+            <li><span>29</span></li>
+            <li><span>30</span></li>
+            <li><span>31</span></li> -->
+          </ul>
+        </div>
+      </div>
+      <div class="dataBox"></div>
+    </div>
+  </body>
+  <script>
+    const dataBox = document.querySelector(".dataBox");
+    const ul = document.createElement("ul");
+    dataBox.appendChild(ul);
+    function showCoronaData(selectDay) {
+      axios
+        .get(
+          `http://openapi.data.go.kr/openapi/service/rest/Covid19/getCovid19SidoInfStateJson?ServiceKey=SWsRmJzVHO7IuJXJyTr1cZ67wahFOQ3AZrE42sX%2B7r%2FnR0HJBFiLTx0euRZ8OVuWrV4EBOUhh0ebANzTergbHw%3D%3D&startCreateDt=${selectDay}&endCreateDt=${selectDay}&_type=json`
+        )
+        .then(function (res) {
+          console.log(res.data.response.body.items.item);
+          const itemList = res.data.response.body.items.item;
+          let output = "";
+          itemList.forEach(function (item, idx) {
+            output += `<li><div class="gubun">${item.gubun}</div><div class="incDec">${item.incDec}</div></li>`;
+            // const li = document.createElement("li");
+            // console.log(item.gubun);
+            // console.log(item.incDec);
+          });
+          ul.innerHTML = output;
+          gsap.from(".dataBox li", { scale: 0, ease: "power3", stagger: 0.02 });
+        });
+    }
+  </script>
+  <!-- http method -->
+  <!-- 
+    create(post)
+    read(get)
+    update(put)
+    delete(delite)
+  -->
+  <!-- axios.get().then() : method chain-->
+  <script>
+    const dateUl = document.querySelector(".calendar .dates ul");
+    const now = new Date(); // 오늘 날짜
+    let pickedNow = new Date(); // 버튼 클릭했을 때, 넘어갈 날짜
+
+    let firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    // 현재 날짜의 월에서 1일을 기준으로 새로운 date 생성
+    const nonLeapYear = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    const leapYear = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    let selectYear;
+
+    let btnNextMonth = document.querySelector(".calendar .header .next");
+    let btnPrevMonth = document.querySelector(".calendar .header .prev");
+    const txtYear = document.querySelector(".calendar .header .year");
+    const txtMonth = document.querySelector(".calendar .header .month");
+
+    btnPrevMonth.addEventListener("click", () => {
+      pickedNow = new Date(pickedNow.getFullYear(), pickedNow.getMonth() - 1, 1);
+      console.log(pickedNow);
+      makeCalendar(pickedNow.getFullYear(), pickedNow.getMonth());
+    });
+    btnNextMonth.addEventListener("click", () => {
+      pickedNow = new Date(pickedNow.getFullYear(), pickedNow.getMonth() + 1, 1);
+      console.log(pickedNow);
+      makeCalendar(pickedNow.getFullYear(), pickedNow.getMonth());
+    });
+    makeCalendar(pickedNow.getFullYear(), pickedNow.getMonth());
+    function makeCalendar(pYear, pMonth) {
+      let output = "";
+      let count = 1;
+      firstDay = new Date(pYear, pMonth, 1);
+      txtYear.textContent = firstDay.getFullYear();
+      txtMonth.textContent = addZero(firstDay.getMonth() + 1);
+
+      // 윤년(4로 나누어 떨어짐 & 100으로 나누어 떨어지지 않음 & 400으로 나누어 떨어짐)
+      if (firstDay.getFullYear() % 4 === 0) {
+        if (firstDay.getFullYear() % 100 === 0) {
+          selectYear = nonLeapYear;
+        } else {
+          selectYear = leapYear;
+        }
+      } else {
+        selectYear = nonLeapYear;
+      }
+      if (firstDay.getFullYear() % 400 === 0) {
+        selectYear = leapYear;
+      }
+      console.log(now.getDay(), "===", firstDay.getDay());
+
+      for (let i = 0; i < 42; i++) {
+        if (i < firstDay.getDay()) {
+          // 비워두기
+          output += `<li class="blank"><span></span></li>`;
+        } else {
+          if (now.getDate() === count && now.getFullYear() === firstDay.getFullYear() && now.getMonth() === firstDay.getMonth()) {
+            output += `<li class="today" data-date="${count}" data-year="${firstDay.getFullYear()}" data-month="${firstDay.getMonth()}"><span>${count}</span></li>`;
+          } else {
+            output += `<li data-date="${count}" data-year="${firstDay.getFullYear()}" data-month="${firstDay.getMonth()}"><span>${count}</span></li>`;
+          }
+          count += 1;
+        }
+        if (count > selectYear[firstDay.getMonth()]) {
+          break;
+          // 반복문이 break를 만나면 종료
+        }
+      }
+      dateUl.innerHTML = output;
+      gsap.from(".calendar .dates li", { scale: 0, ease: "power3", stagger: 0.02 });
+
+      const dateLi = document.querySelectorAll(".calendar .dates li");
+      let selectedDate;
+      dateLi.forEach(function (item, idx) {
+        item.addEventListener("click", () => {
+          // console.log(item.dataset.date);
+          const selectDay = `${item.dataset.year}${addZero(parseInt(item.dataset.month) + 1)}${addZero(item.dataset.date)}`;
+          // parseInt : 문자를 정수로 바꿈
+          if (selectedDate) {
+            selectedDate.classList.remove("on");
+          }
+          selectedDate = item;
+          selectedDate.classList.add("on");
+          showCoronaData(selectDay);
+        });
+      });
+    }
+
+    // 이벤트 위임
+    // dateUl.addEventListener("click", (e) => {
+    //   console.log(e.target.nodeName);
+    //   if (e.target.nodeName === "SPAN") {
+    //     showCoronaData(`${now.getFullYear()}${now.getMonth() + 1}${addZero(now.getDate())}`);
+    //   }
+    // });
+
+    function addZero(num) {
+      if (num < 10) {
+        return "0" + num;
+      } else {
+        return "" + num;
+      }
+    }
+    showCoronaData(`${now.getFullYear()}${now.getMonth() + 1}${addZero(now.getDate())}`);
+    // for (let j = 0; j < 100; j++) {
+    //   if (j % 3 === 0) {
+    //     continue;
+    //   }
+    //   console.log(j);
+    // }
+  </script>
+</html>
