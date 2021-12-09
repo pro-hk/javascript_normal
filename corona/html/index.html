@@ -187,6 +187,7 @@
         item.addEventListener("click", () => {
           // console.log(item.dataset.date);
           const selectDay = `${item.dataset.year}${addZero(parseInt(item.dataset.month) + 1)}${addZero(item.dataset.date)}`;
+          console.log(selectDay);
           // parseInt : 문자를 정수로 바꿈
           if (selectedDate) {
             selectedDate.classList.remove("on");
